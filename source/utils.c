@@ -7,28 +7,53 @@ By corenting (http://www.corenting.fr)
 #include <gccore.h>
 #include "utils.h"
 
-void SetFgColor(u32 color, u8 bold)
+void SetFgColor(uint color, ushort bold)
 {
     printf("\x1b[%u;%um", color + 30, bold);
     fflush(stdout);
 }
 
-void SetBgColor(u32 color, u8 bold)
+void SetBgColor(uint color, ushort bold)
 {
     printf("\x1b[%u;%um", color + 40, bold);
     fflush(stdout);
 }
 
-void SetPosition(int column, int row)
+void SetPosition(ushort column, ushort row)
 {
     printf("\x1b[%d;%dH", row, column);
 }
 
-void LongWait(int waitTime)
+void LongWait(ushort waitTime)
 {
     int i = 0;
-    for (i; i < waitTime; i++)
+    while (i < 5)
     {
         VIDEO_WaitVSync();
+        i++;
+    }
+}
+
+char *GetPadDirection(short x, short y)
+{
+    if (y < -65)
+    {
+        return "(down)";
+    }
+    else if (y > 65)
+    {
+        return "(up)";
+    }
+    else if (x < -65)
+    {
+        return "(left)";
+    }
+    else if (x > 65)
+    {
+        return "(right)";
+    }
+    else
+    {
+        return "";
     }
 }

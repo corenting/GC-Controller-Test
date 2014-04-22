@@ -5,23 +5,13 @@ Version 1.0
 */
 
 
-/*
-TODO list :
-
-	- Ajout sticks en tant que boutons (directions) :
-		if(PAD_StickY(0) < -65)    {printf("You-Pressed Stick Analogic Down:\n");}
-		else if(PAD_StickY(0) > 65)    {printf("You-Pressed Stick Analogic Up:\n");}
-		if(PAD_StickX(0) < -65)    {printf("You-Pressed Stick Analogic Left:\n");}
-		else if(PAD_StickX(0) > 65)    {printf("You-Pressed Stick Analogic Right:\n");}
-	- Ajout dpad
-	- Ajout support des 4 ports (variable pour le port, modifiable entre 1 et 4 avec une combinaison de touches)
-	- Ajout ifndef (Gamecube/Wii) pour le retour vers le loader
-
-*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <gccore.h>
 #include "utils.h"
+
+#define comboWait 2
+#define consoleStartPos 20
 
 static void *xfb = NULL;
 static GXRModeObj *rmode = NULL;
@@ -42,7 +32,7 @@ int main(int argc, char **argv)
     xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
 
     // Initialise the console, required for printf
-    console_init(xfb, 20, 20, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
+    console_init(xfb, consoleStartPos, consoleStartPos, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
 
     // Set up the video registers with the chosen mode
     VIDEO_Configure(rmode);
@@ -61,105 +51,114 @@ int main(int argc, char **argv)
     if (rmode->viTVMode & VI_NON_INTERLACE) VIDEO_WaitVSync();
 
     SetFgColor(2, 2);
-    printf("GC Controller Test by Corenting (version 1.0)\n\n");
+    printf("GC Controller Test by Corenting (version 1.0) - ");
+    #ifdef WII
+    	printf("Wii version\n\n");
+	#endif
+    #ifdef GC
+    	printf("Gamecube version\n\n");
+	#endif
     SetFgColor(1, 2);
     printf("You can only use the first Gamecube controller.\n\n\n");
     SetFgColor(5, 2);
     printf("Special functions :\n\n");
     SetFgColor(7, 2);
     printf("A + B : rumble test\n");
-    printf("L + R : return to the loader\n\n");
+	#ifdef WII
+    	printf("L + R : return to the loader\n\n");
+	#endif
 
     //Vars and consts
-    int ABPressed[2] = {0, 0};
-    int LRPressed[2] = {0, 0};
-    int latestButtonsWait = 0;
-    const int comboWait = 3;
+    uint GCHeld = 0;
+    uint GCHeldOld = 0;
 
     while (1)
     {
 
+        //Stop rumble
+        PAD_ControlMotor(0, 0);
+
         // Call PAD_ScanPads each loop, this reads the latest controller states
         PAD_ScanPads();
 
-        // WPAD_ButtonsDown tells us which buttons were pressed in this loop
+        // PAD_ButtonsDown tells us which buttons were pressed in this loop
         // this is a "one shot" state which will not fire again until the button has been released
-        u32 GCHeld = PAD_ButtonsHeld(0);
+        GCHeld = PAD_ButtonsHeld(0);
+
+        //Go to the correct position
+		#ifdef WII
+        	SetPosition(0, 10);
+		#endif
+		#ifdef GC
+        	SetPosition(0, 9);
+		#endif
+
+
+        SetPosition(0, 10);
 
         //Checking all the buttons
-        SetPosition(0, 10);
         SetFgColor(5, 2);
         printf("Buttons :\n\n");
         SetFgColor(7, 2);
-        printf("	A      : %s\n", (GCHeld & PAD_BUTTON_A) ? "Held    " : "        ");
-        printf("	B      : %s\n", (GCHeld & PAD_BUTTON_B) ? "Held    " : "        ");
-        printf("	X      : %s\n", (GCHeld & PAD_BUTTON_X) ? "Held    " : "        ");
-        printf("	Y      : %s\n", (GCHeld & PAD_BUTTON_Y) ? "Held    " : "        ");
-        printf("	Z      : %s\n", (GCHeld & PAD_TRIGGER_Z) ? "Held    " : "        ");
-        printf("	L      : %s\n", (GCHeld & PAD_TRIGGER_L) ? "Held    " : "        ");
-        printf("	R      : %s\n", (GCHeld & PAD_TRIGGER_R) ? "Held    " : "        ");
-        printf("	START  : %s\n\n", (GCHeld & PAD_BUTTON_START) ? "Held    " : "        ");
-
-        SetFgColor(5, 2);
-        printf("Sticks and triggers (analog) :\n\n");
-        SetFgColor(7, 2);
-        printf("	L trigger           : %d\n", PAD_TriggerL(0));
-        printf("	R trigger           : %d\n", PAD_TriggerR(0));
-        printf("	Stick value (X,Y)   : %d,%d\n", PAD_StickX(0), PAD_StickY(0));
-        printf("	C-stick value (X,Y) : %d,%d\n", PAD_SubStickX(0), PAD_SubStickY(0));
-
-        //Add buttons to their list for special actions
-        if (GCHeld & PAD_BUTTON_A)
+        printf("	A      : %s\n", (GCHeld & PAD_BUTTON_A) ? "held    " : "        ");
+        printf("	B      : %s\n", (GCHeld & PAD_BUTTON_B) ? "held    " : "        ");
+        printf("	X      : %s\n", (GCHeld & PAD_BUTTON_X) ? "held    " : "        ");
+        printf("	Y      : %s\n", (GCHeld & PAD_BUTTON_Y) ? "held    " : "        ");
+        printf("	Z      : %s\n", (GCHeld & PAD_TRIGGER_Z) ? "held    " : "        ");
+        printf("	START  : %s\n", (GCHeld & PAD_BUTTON_START) ? "held    " : "        ");
+        printf("	Pad    : ");
+        if (GCHeld & PAD_BUTTON_LEFT)
         {
-            ABPressed[0] = 1;
+            printf("left ");
         }
-        if (GCHeld & PAD_BUTTON_B)
+        else if (GCHeld & PAD_BUTTON_RIGHT)
         {
-            ABPressed[1] = 1;
+            printf("right");
         }
-        if (GCHeld & PAD_TRIGGER_L)
+        else if (GCHeld & PAD_BUTTON_UP)
         {
-            LRPressed[0] = 1;
+            printf("up   ");
         }
-        if (GCHeld & PAD_TRIGGER_R)
+        else if (GCHeld & PAD_BUTTON_DOWN)
         {
-            LRPressed[1] = 1;
-        }
-
-        //Special actions
-        if (ABPressed[0] == 1 && ABPressed[1] == 1)
-        {
-            PAD_ControlMotor(0, 1);
-            latestButtonsWait = 0;
-            ABPressed[0] = 0;
-            ABPressed[1] = 0;
-        }
-
-        if (LRPressed[0] == 1 && LRPressed[1] == 1)
-        {
-            exit(0);
-        }
-
-        //Timer to clear the lists and stop the rumble
-        if (latestButtonsWait < comboWait)
-        {
-            latestButtonsWait++;
+            printf("down ");
         }
         else
         {
-            latestButtonsWait = 0;
-            int i;
-            for (i = 0; i < 2; i++)
-            {
-                ABPressed[i] = 0;
-                LRPressed[i] = 0;
-            }
-            PAD_ControlMotor(0, 0);
+        	printf("     ");
         }
 
-        // Wait for the next frame
+
+        printf("\n\n");
+        SetFgColor(5, 2);
+        printf("Sticks and triggers (analog) :\n\n");
+        SetFgColor(7, 2);
+        printf("	L trigger           : %d  ", PAD_TriggerL(0));
+        (GCHeld & PAD_TRIGGER_L) ? printf("(held)\n") : printf("        \n");
+        printf("	R trigger           : %d  ", PAD_TriggerR(0));
+        (GCHeld & PAD_TRIGGER_R) ? printf("(held)\n") : printf("        \n");
+        printf("	Stick value (X,Y)   : %d,%d  %s        \n", PAD_StickX(0), PAD_StickY(0),GetPadDirection(PAD_StickX(0),PAD_StickY(0)));
+        printf("	C-stick value (X,Y) : %d,%d  %s        \n", PAD_SubStickX(0), PAD_SubStickY(0),GetPadDirection(PAD_SubStickX(0),PAD_SubStickY(0)));
+
+
+        //Special actions
+        if (GCHeld & PAD_BUTTON_A && GCHeldOld & PAD_BUTTON_B)
+        {
+            PAD_ControlMotor(0, 1);
+        }
+
+		#ifdef WII
+	        if (GCHeld & PAD_TRIGGER_L && GCHeldOld & PAD_TRIGGER_R)
+	        {
+	            exit(0);
+	        }
+        #endif
+
+
+	    //Store current state for the next iteration, for the special actions
+        GCHeldOld = GCHeld;
+        // Wait for 5 frames;
         LongWait(5);
     }
-
-    return 0;
+    exit(0);
 }

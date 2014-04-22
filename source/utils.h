@@ -3,7 +3,8 @@ GC Controller Test
 By corenting (http://www.corenting.fr)
 */
 
-void SetFgColor(u32, u8);
-void SetBgColor(u32, u8);
-void SetPosition(int,int);
-void LongWait(int);
+void SetFgColor(uint, ushort);
+void SetBgColor(uint, ushort);
+void SetPosition(ushort, ushort);
+void LongWait(ushort);
+char *GetPadDirection(short, short);
