@@ -10,7 +10,6 @@ Version 1.0
 #include <gccore.h>
 #include "utils.h"
 
-#define comboWait 2
 #define consoleStartPos 20
 
 static void *xfb = NULL;
