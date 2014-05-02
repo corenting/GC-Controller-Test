@@ -4,7 +4,6 @@ By corenting (http://www.corenting.fr)
 Version 1.0
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <gccore.h>
@@ -51,21 +50,21 @@ int main(int argc, char **argv)
 
     SetFgColor(2, 2);
     printf("GC Controller Test by Corenting (version 1.0) - ");
-    #ifdef WII
-    	printf("Wii version\n\n");
-	#endif
-    #ifdef GC
-    	printf("Gamecube version\n\n");
-	#endif
+#ifdef WII
+    printf("Wii version\n\n");
+#endif
+#ifdef GC
+    printf("Gamecube version\n\n");
+#endif
     SetFgColor(1, 2);
     printf("You can only use the first Gamecube controller.\n\n\n");
     SetFgColor(5, 2);
     printf("Special functions :\n\n");
     SetFgColor(7, 2);
     printf("A + B : rumble test\n");
-	#ifdef WII
-    	printf("L + R : return to the loader\n\n");
-	#endif
+#ifdef WII
+    printf("L + R : return to the loader\n\n");
+#endif
 
     //Vars and consts
     uint GCHeld = 0;
@@ -85,15 +84,12 @@ int main(int argc, char **argv)
         GCHeld = PAD_ButtonsHeld(0);
 
         //Go to the correct position
-		#ifdef WII
-        	SetPosition(0, 10);
-		#endif
-		#ifdef GC
-        	SetPosition(0, 9);
-		#endif
-
-
+#ifdef WII
         SetPosition(0, 10);
+#endif
+#ifdef GC
+        SetPosition(0, 9);
+#endif
 
         //Checking all the buttons
         SetFgColor(5, 2);
@@ -124,7 +120,7 @@ int main(int argc, char **argv)
         }
         else
         {
-        	printf("     ");
+            printf("     ");
         }
 
 
@@ -146,15 +142,15 @@ int main(int argc, char **argv)
             PAD_ControlMotor(0, 1);
         }
 
-		#ifdef WII
-	        if (GCHeld & PAD_TRIGGER_L && GCHeldOld & PAD_TRIGGER_R)
-	        {
-	            exit(0);
-	        }
-        #endif
+#ifdef WII
+        if (GCHeld & PAD_TRIGGER_L && GCHeldOld & PAD_TRIGGER_R)
+        {
+            exit(0);
+        }
+#endif
 
 
-	    //Store current state for the next iteration, for the special actions
+        //Store current state for the next iteration, for the special actions
         GCHeldOld = GCHeld;
         // Wait for 5 frames;
         LongWait(5);
