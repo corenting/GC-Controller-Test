@@ -27,8 +27,7 @@ void SetPosition(ushort column, ushort row)
 void LongWait(ushort waitTime)
 {
     int i = 0;
-    while (i < 5)
-    {
+    while (i < 5) {
         VIDEO_WaitVSync();
         i++;
     }
@@ -36,36 +35,28 @@ void LongWait(ushort waitTime)
 
 char *GetPadDirection(short x, short y)
 {
-    if (y < -50 && x < -50)
-    {
+    if (y < -50 && x < -50) {
         return "(down-left) ";
     }
-    if (y < -50 && x > 50)
-    {
+    if (y < -50 && x > 50) {
         return "(down-right)";
     }
-    if (y > 50 && x > 50)
-    {
+    if (y > 50 && x > 50) {
         return "(up-right)  ";
     }
-    if (y > 50 && x < -50)
-    {
+    if (y > 50 && x < -50) {
         return "(up-left)   ";
     }
-    if (y < -65)
-    {
+    if (y < -65) {
         return "(down)      ";
     }
-    if (y > 65)
-    {
+    if (y > 65) {
         return "(up)        ";
     }
-    if (x < -65)
-    {
+    if (x < -65) {
         return "(left)      ";
     }
-    if (x > 65)
-    {
+    if (x > 65) {
         return "(right)     ";
     }
     return "            ";

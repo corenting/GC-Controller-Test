@@ -10,47 +10,36 @@ Version 1.0
 
 #include "utils.h"
 
-#define consoleStartPos 20
+#define CONSOLE_START_POS 20
+#define V_MAJOR 1
+#define V_MINOR 1
 
 static void *xfb = NULL;
 static GXRModeObj *rmode = NULL;
 
 int main(int argc, char **argv)
 {
-    // Initialise the video system
     VIDEO_Init();
-
-    // This function initialises the attached controllers (GC and Wii)
     PAD_Init();
-
-    // Obtain the preferred video mode from the system
-    // This will correspond to the settings in the Wii menu
-    rmode = VIDEO_GetPreferredMode(NULL);
-
-    // Allocate memory for the display in the uncached region
-    xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
-
-    // Initialise the console, required for printf
-    console_init(xfb, consoleStartPos, consoleStartPos, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
-
-    // Set up the video registers with the chosen mode
-    VIDEO_Configure(rmode);
-
-    // Tell the video hardware where our display memory is
-    VIDEO_SetNextFramebuffer(xfb);
-
-    // Make the display visible
-    VIDEO_SetBlack(FALSE);
-
-    // Flush the video register changes to the hardware
-    VIDEO_Flush();
-
+    rmode = VIDEO_GetPreferredMode(NULL); // Obtain the preferred video mode from the Wii menu
+    xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode)); // Allocate memory for the display in the uncached region
+    console_init(xfb, CONSOLE_START_POS, CONSOLE_START_POS, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
+    VIDEO_Configure(rmode); // Set up the video registers with the chosen mode
+    VIDEO_SetNextFramebuffer(xfb); // Tell the video hardware where our display memory is
+    VIDEO_SetBlack(FALSE); // Make the display visible
+    VIDEO_Flush(); // Flush the video register changes to the hardware
     // Wait for Video setup to complete
     VIDEO_WaitVSync();
     if (rmode->viTVMode & VI_NON_INTERLACE) VIDEO_WaitVSync();
 
+    //Vars
+    short activePad = 0;
+    uint GCHeld[4] = {0,0,0,0};
+    uint GCHeldOld[4] = {0,0,0,0};
+
+    //Static text
     SetFgColor(2, 2);
-    printf("GC Controller Test by Corenting (version 1.0) - ");
+    printf("GC Controller Test by Corenting (version %d.%d) - ",V_MAJOR,V_MINOR);
 #ifdef WII
     printf("Wii version\n\n");
 #endif
@@ -58,7 +47,7 @@ int main(int argc, char **argv)
     printf("Gamecube version\n\n");
 #endif
     SetFgColor(1, 2);
-    printf("You can only use the first Gamecube controller.\n\n\n");
+    printf("Active controller : %d (press a button on another controller to switch)\n\n\n",activePad + 1);
     SetFgColor(5, 2);
     printf("Special functions (hold the buttons) :\n\n");
     SetFgColor(7, 2);
@@ -67,24 +56,12 @@ int main(int argc, char **argv)
     printf("    L + R : return to the loader\n\n");
 #endif
 
-    //Vars and consts
-    short activePad = 0;
-    uint GCHeld[4] = {0,0,0,0};
-    uint GCHeldOld[4] = {0,0,0,0};
+    while (1) {
 
-    while (1)
-    {
-        //Stop rumble
-        PAD_ControlMotor(0, 0);
-
-        // Call PAD_ScanPads each loop, this reads the latest controller states
         PAD_ScanPads();
-
-        // PAD_ButtonsDown tells us which buttons were pressed in this loop
-        // this is a "one shot" state which will not fire again until the button has been released
         int i;
-        for(i =0; i < 4; i++)
-        {
+        for(i =0; i < 4; i++) {
+            PAD_ControlMotor(i, 0); //Stop rumble
             GCHeld[i] = PAD_ButtonsHeld(i);
         }
 
@@ -124,24 +101,27 @@ int main(int argc, char **argv)
 
 
         //Special actions
-        if (GCHeld[activePad] & PAD_BUTTON_A && GCHeldOld[activePad] & PAD_BUTTON_B)
-        {
-            PAD_ControlMotor(0, 1);
+        if (GCHeld[activePad] & PAD_BUTTON_A && GCHeldOld[activePad] & PAD_BUTTON_B) {
+            PAD_ControlMotor(activePad, 1);
         }
-
 #ifdef WII
-        if (GCHeld[activePad] & PAD_TRIGGER_L && GCHeldOld[activePad] & PAD_TRIGGER_R)
-        {
+        if (GCHeld[activePad] & PAD_TRIGGER_L && GCHeldOld[activePad] & PAD_TRIGGER_R) {
             exit(0);
         }
 #endif
 
         //Active controller modifier
-
+        for(i =0; i < 4; i++) {
+            if (GCHeld[i] !=0) {
+                activePad=i;
+                SetPosition(20, 2);
+                SetFgColor(1, 2);
+                printf("%d",activePad + 1);
+            }
+        }
 
         //Store current state for the next iteration, for the special actions
-        for(i =0; i < 4; i++)
-        {
+        for(i =0; i < 4; i++) {
             GCHeldOld[i] = GCHeld[i];
         }
         // Wait for 5 frames;
