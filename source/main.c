@@ -7,6 +7,7 @@ Version 1.0
 #include <stdio.h>
 #include <stdlib.h>
 #include <gccore.h>
+
 #include "utils.h"
 
 #define consoleStartPos 20
@@ -59,20 +60,20 @@ int main(int argc, char **argv)
     SetFgColor(1, 2);
     printf("You can only use the first Gamecube controller.\n\n\n");
     SetFgColor(5, 2);
-    printf("Special functions :\n\n");
+    printf("Special functions (hold the buttons) :\n\n");
     SetFgColor(7, 2);
-    printf("A + B : rumble test\n");
+    printf("    A + B : rumble test\n");
 #ifdef WII
-    printf("L + R : return to the loader\n\n");
+    printf("    L + R : return to the loader\n\n");
 #endif
 
     //Vars and consts
-    uint GCHeld = 0;
-    uint GCHeldOld = 0;
+    short activePad = 0;
+    uint GCHeld[4] = {0,0,0,0};
+    uint GCHeldOld[4] = {0,0,0,0};
 
     while (1)
     {
-
         //Stop rumble
         PAD_ControlMotor(0, 0);
 
@@ -81,7 +82,11 @@ int main(int argc, char **argv)
 
         // PAD_ButtonsDown tells us which buttons were pressed in this loop
         // this is a "one shot" state which will not fire again until the button has been released
-        GCHeld = PAD_ButtonsHeld(0);
+        int i;
+        for(i =0; i < 4; i++)
+        {
+            GCHeld[i] = PAD_ButtonsHeld(i);
+        }
 
         //Go to the correct position
 #ifdef WII
@@ -95,63 +100,50 @@ int main(int argc, char **argv)
         SetFgColor(5, 2);
         printf("Buttons :\n\n");
         SetFgColor(7, 2);
-        printf("	A      : %s\n", (GCHeld & PAD_BUTTON_A) ? "held    " : "        ");
-        printf("	B      : %s\n", (GCHeld & PAD_BUTTON_B) ? "held    " : "        ");
-        printf("	X      : %s\n", (GCHeld & PAD_BUTTON_X) ? "held    " : "        ");
-        printf("	Y      : %s\n", (GCHeld & PAD_BUTTON_Y) ? "held    " : "        ");
-        printf("	Z      : %s\n", (GCHeld & PAD_TRIGGER_Z) ? "held    " : "        ");
-        printf("	START  : %s\n", (GCHeld & PAD_BUTTON_START) ? "held    " : "        ");
-        printf("	Pad    : ");
-        if (GCHeld & PAD_BUTTON_LEFT)
-        {
-            printf("left ");
-        }
-        else if (GCHeld & PAD_BUTTON_RIGHT)
-        {
-            printf("right");
-        }
-        else if (GCHeld & PAD_BUTTON_UP)
-        {
-            printf("up   ");
-        }
-        else if (GCHeld & PAD_BUTTON_DOWN)
-        {
-            printf("down ");
-        }
-        else
-        {
-            printf("     ");
-        }
-
+        printf((GCHeld[activePad] & PAD_BUTTON_A) ? "    A " : "      ");
+        printf((GCHeld[activePad] & PAD_BUTTON_B) ? "B " : "  ");
+        printf((GCHeld[activePad] & PAD_BUTTON_X) ? "X " : "  ");
+        printf((GCHeld[activePad] & PAD_BUTTON_Y) ? "Y " : "  ");
+        printf((GCHeld[activePad] & PAD_TRIGGER_Z) ? "Z " : "  ");
+        printf((GCHeld[activePad] & PAD_TRIGGER_L) ? "L " : "  ");
+        printf((GCHeld[activePad] & PAD_TRIGGER_R) ? "R " : "  ");
+        printf((GCHeld[activePad] & PAD_BUTTON_START) ? "START " : "      ");
+        printf((GCHeld[activePad] & PAD_BUTTON_LEFT) ? "LEFT " : "     ");
+        printf((GCHeld[activePad] & PAD_BUTTON_RIGHT) ? "RIGHT " : "      ");
+        printf((GCHeld[activePad] & PAD_BUTTON_UP) ? "UP " : "   ");
+        printf((GCHeld[activePad] & PAD_BUTTON_UP) ? "DOWN " : "     ");
 
         printf("\n\n");
         SetFgColor(5, 2);
         printf("Sticks and triggers (analog) :\n\n");
         SetFgColor(7, 2);
-        printf("	L trigger           : %d  ", PAD_TriggerL(0));
-        (GCHeld & PAD_TRIGGER_L) ? printf("(held)\n") : printf("        \n");
-        printf("	R trigger           : %d  ", PAD_TriggerR(0));
-        (GCHeld & PAD_TRIGGER_R) ? printf("(held)\n") : printf("        \n");
-        printf("	Stick value (X,Y)   : %d,%d  %s        \n", PAD_StickX(0), PAD_StickY(0),GetPadDirection(PAD_StickX(0),PAD_StickY(0)));
-        printf("	C-stick value (X,Y) : %d,%d  %s        \n", PAD_SubStickX(0), PAD_SubStickY(0),GetPadDirection(PAD_SubStickX(0),PAD_SubStickY(0)));
+        printf("	L trigger           : %03d\n", PAD_TriggerL(activePad));
+        printf("	R trigger           : %03d\n", PAD_TriggerR(activePad));
+        printf("	Stick value (X,Y)   : %03d,%03d %s\n", PAD_StickX(activePad), PAD_StickY(activePad),GetPadDirection(PAD_StickX(activePad),PAD_StickY(activePad)));
+        printf("	C-stick value (X,Y) : %03d,%03d %s\n", PAD_SubStickX(activePad), PAD_SubStickY(activePad),GetPadDirection(PAD_SubStickX(activePad),PAD_SubStickY(activePad)));
 
 
         //Special actions
-        if (GCHeld & PAD_BUTTON_A && GCHeldOld & PAD_BUTTON_B)
+        if (GCHeld[activePad] & PAD_BUTTON_A && GCHeldOld[activePad] & PAD_BUTTON_B)
         {
             PAD_ControlMotor(0, 1);
         }
 
 #ifdef WII
-        if (GCHeld & PAD_TRIGGER_L && GCHeldOld & PAD_TRIGGER_R)
+        if (GCHeld[activePad] & PAD_TRIGGER_L && GCHeldOld[activePad] & PAD_TRIGGER_R)
         {
             exit(0);
         }
 #endif
 
+        //Active controller modifier
+
 
         //Store current state for the next iteration, for the special actions
-        GCHeldOld = GCHeld;
+        for(i =0; i < 4; i++)
+        {
+            GCHeldOld[i] = GCHeld[i];
+        }
         // Wait for 5 frames;
         LongWait(5);
     }

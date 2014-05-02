@@ -36,24 +36,37 @@ void LongWait(ushort waitTime)
 
 char *GetPadDirection(short x, short y)
 {
+    if (y < -50 && x < -50)
+    {
+        return "(down-left) ";
+    }
+    if (y < -50 && x > 50)
+    {
+        return "(down-right)";
+    }
+    if (y > 50 && x > 50)
+    {
+        return "(up-right)  ";
+    }
+    if (y > 50 && x < -50)
+    {
+        return "(up-left)   ";
+    }
     if (y < -65)
     {
-        return "(down)";
+        return "(down)      ";
     }
-    else if (y > 65)
+    if (y > 65)
     {
-        return "(up)";
+        return "(up)        ";
     }
-    else if (x < -65)
+    if (x < -65)
     {
-        return "(left)";
+        return "(left)      ";
     }
-    else if (x > 65)
+    if (x > 65)
     {
-        return "(right)";
+        return "(right)     ";
     }
-    else
-    {
-        return "";
-    }
+    return "            ";
 }
