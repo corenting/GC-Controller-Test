@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     printf("Gamecube version\n\n");
 #endif
     SetFgColor(1, 2);
-    printf("Active controller : %d (press a button on another controller to switch)\n\n\n",activePad + 1);
+    printf("Current controller : %d (press a button on another controller to switch)\n\n\n",activePad + 1);
     SetFgColor(5, 2);
     printf("Special functions (hold the buttons) :\n\n");
     SetFgColor(7, 2);
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
         for(i =0; i < 4; i++) {
             if (GCHeld[i] !=0) {
                 activePad=i;
-                SetPosition(20, 2);
+                SetPosition(21, 2);
                 SetFgColor(1, 2);
                 printf("%d",activePad + 1);
             }
