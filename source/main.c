@@ -12,7 +12,7 @@ Version 1.0
 
 #define CONSOLE_START_POS 20
 #define V_MAJOR 1
-#define V_MINOR 1
+#define V_MINOR 2
 
 static void *xfb = NULL;
 static GXRModeObj *rmode = NULL;
