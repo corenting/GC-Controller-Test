@@ -88,7 +88,7 @@ int main(int argc, char **argv)
         printf((GCHeld[activePad] & PAD_BUTTON_LEFT) ? "LEFT " : "     ");
         printf((GCHeld[activePad] & PAD_BUTTON_RIGHT) ? "RIGHT " : "      ");
         printf((GCHeld[activePad] & PAD_BUTTON_UP) ? "UP " : "   ");
-        printf((GCHeld[activePad] & PAD_BUTTON_UP) ? "DOWN " : "     ");
+        printf((GCHeld[activePad] & PAD_BUTTON_DOWN) ? "DOWN " : "     ");
 
         printf("\n\n");
         SetFgColor(5, 2);
