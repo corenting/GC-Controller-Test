@@ -1,7 +1,7 @@
 /*
 GC Controller Test
 By corenting (http://www.corenting.fr)
-Version 1.0
+Version 1.2
 */
 
 #include <stdio.h>
@@ -19,25 +19,27 @@ static GXRModeObj *rmode = NULL;
 
 int main(int argc, char **argv)
 {
+    // Init
     VIDEO_Init();
     PAD_Init();
-    rmode = VIDEO_GetPreferredMode(NULL); // Obtain the preferred video mode from the Wii menu
-    xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode)); // Allocate memory for the display in the uncached region
+    rmode = VIDEO_GetPreferredMode(NULL);
+    xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
     console_init(xfb, CONSOLE_START_POS, CONSOLE_START_POS, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
-    VIDEO_Configure(rmode); // Set up the video registers with the chosen mode
-    VIDEO_SetNextFramebuffer(xfb); // Tell the video hardware where our display memory is
-    VIDEO_SetBlack(FALSE); // Make the display visible
-    VIDEO_Flush(); // Flush the video register changes to the hardware
+    VIDEO_Configure(rmode);
+    VIDEO_SetNextFramebuffer(xfb);
+    VIDEO_SetBlack(FALSE);
+    VIDEO_Flush();
+
     // Wait for Video setup to complete
     VIDEO_WaitVSync();
     if (rmode->viTVMode & VI_NON_INTERLACE) VIDEO_WaitVSync();
 
-    //Vars
+    // Vars
     short activePad = 0;
-    uint GCHeld[4] = {0,0,0,0};
-    uint GCHeldOld[4] = {0,0,0,0};
+    uint GCHeld[4] = {0, 0, 0, 0};
+    uint GCHeldOld[4] = {0, 0, 0, 0};
 
-    //Static text
+    // Header text
     SetFgColor(2, 2);
     printf("GC Controller Test by Corenting (version %d.%d) - ",V_MAJOR,V_MINOR);
 #ifdef WII
@@ -57,10 +59,8 @@ int main(int argc, char **argv)
 #endif
 
     while (1) {
-
         PAD_ScanPads();
-        int i;
-        for(i =0; i < 4; i++) {
+        for(int i = 0; i < 4; i++) {
             PAD_ControlMotor(i, 0); //Stop rumble
             GCHeld[i] = PAD_ButtonsHeld(i);
         }
@@ -73,9 +73,9 @@ int main(int argc, char **argv)
         SetPosition(0, 9);
 #endif
 
-        //Checking all the buttons
+        // Buttons
         SetFgColor(5, 2);
-        printf("Buttons :\n\n");
+        printf("Buttons:\n\n");
         SetFgColor(7, 2);
         printf((GCHeld[activePad] & PAD_BUTTON_A) ? "    A " : "      ");
         printf((GCHeld[activePad] & PAD_BUTTON_B) ? "B " : "  ");
@@ -90,14 +90,15 @@ int main(int argc, char **argv)
         printf((GCHeld[activePad] & PAD_BUTTON_UP) ? "UP " : "   ");
         printf((GCHeld[activePad] & PAD_BUTTON_DOWN) ? "DOWN " : "     ");
 
+        // Sticks and triggers
         printf("\n\n");
         SetFgColor(5, 2);
         printf("Sticks and triggers (analog) :\n\n");
         SetFgColor(7, 2);
         printf("	L trigger           : %03d\n", PAD_TriggerL(activePad));
         printf("	R trigger           : %03d\n", PAD_TriggerR(activePad));
-        printf("	Stick value (X,Y)   : %03d,%03d %s\n", PAD_StickX(activePad), PAD_StickY(activePad),GetPadDirection(PAD_StickX(activePad),PAD_StickY(activePad)));
-        printf("	C-stick value (X,Y) : %03d,%03d %s\n", PAD_SubStickX(activePad), PAD_SubStickY(activePad),GetPadDirection(PAD_SubStickX(activePad),PAD_SubStickY(activePad)));
+        printf("	Stick value (X,Y)   : %03d,%03d %s\n", PAD_StickX(activePad), PAD_StickY(activePad), GetPadDirection(PAD_StickX(activePad), PAD_StickY(activePad)));
+        printf("	C-stick value (X,Y) : %03d,%03d %s\n", PAD_SubStickX(activePad), PAD_SubStickY(activePad), GetPadDirection(PAD_SubStickX(activePad), PAD_SubStickY(activePad)));
 
 
         //Special actions
@@ -111,17 +112,17 @@ int main(int argc, char **argv)
 #endif
 
         //Active controller modifier
-        for(i =0; i < 4; i++) {
-            if (GCHeld[i] !=0) {
-                activePad=i;
+        for(int i = 0; i < 4; i++) {
+            if (GCHeld[i] != 0) {
+                activePad = i;
                 SetPosition(21, 2);
                 SetFgColor(1, 2);
-                printf("%d",activePad + 1);
+                printf("%d", activePad + 1);
             }
         }
 
         //Store current state for the next iteration, for the special actions
-        for(i =0; i < 4; i++) {
+        for(int i = 0; i < 4; i++) {
             GCHeldOld[i] = GCHeld[i];
         }
         // Wait for 5 frames;
