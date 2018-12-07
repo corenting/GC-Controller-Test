@@ -1,7 +1,7 @@
 .PHONY: all
 .PHONY: clean
 
-all: gc wii
+all: switch gc wii
 
 .PHONY: gc
 gc:
@@ -11,7 +11,17 @@ gc:
 wii:
 	make -f Makefile.wii
 
+.PHONY: switch
+switch:
+	make -f Makefile.switch
+
 clean:
-	rm -rf build
+	rm -rf build_gc
+	rm -rf build_wii
+	rm -rf build_switch
 	rm *.dol
 	rm *.elf
+	rm *.nacp
+	rm *.nro
+	rm *.nso
+	rm *.pfs0

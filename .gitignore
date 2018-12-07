@@ -1,3 +1,14 @@
 *.elf
 *.dol
+*.nacp
+*.nro
+*.nso
+*.pfs0
+
 build/
+build_gc/
+build_wii/
+build_switch/
+
+.vscode/
+.idea/

@@ -16,16 +16,16 @@ include $(DEVKITPPC)/wii_rules
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
 TARGET		:=	$(notdir $(CURDIR))
-BUILD		:=	build
-SOURCES		:=	source
+BUILD		:=	build_wii
+SOURCES		:=	ppc common
 DATA		:=	data  
-INCLUDES	:=
+INCLUDES	:=	common
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS	= -g -O3 -Wall $(MACHDEP) $(INCLUDE) -DWII
+CFLAGS	= -g -O3 -Wall $(MACHDEP) $(INCLUDE) -D__WII__
 CXXFLAGS	=	$(CFLAGS)
 
 LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map
@@ -98,15 +98,6 @@ export OUTPUT	:=	$(CURDIR)/$(TARGET)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile.wii
-
-#---------------------------------------------------------------------------------
-clean:
-	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT)-wii.elf $(OUTPUT)-wii.dol
-
-#---------------------------------------------------------------------------------
-run:
-	wiiload $(TARGET)-wii.dol
 
 
 #---------------------------------------------------------------------------------
