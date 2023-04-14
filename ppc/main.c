@@ -1,8 +1,3 @@
-/*
-GC Controller Test
-By corenting
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -50,7 +45,7 @@ int main(int argc, char **argv) {
 #ifdef __WII__
         SetPosition(0, 10);
 #endif
-#ifdef __GC__
+#ifdef __GAMECUBE__
         SetPosition(0, 9);
 #endif
 

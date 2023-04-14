@@ -1,5 +1,11 @@
 # GC-Controller-Test
 
-A simple homebrew (for Wii and Gamecube) to test your Gamecube controllers, created by corenting.
+A simple homebrew to test your Gamecube controllers.
 
-Website : [here](http://www.corenting.fr/)
+Works on both Wii and Gamecube.
+
+![Screenshot](./docs/screenshot.png)
+
+## Downloads
+
+[See the releases section on Github](https://github.com/corenting/GC-Controller-Test/releases).

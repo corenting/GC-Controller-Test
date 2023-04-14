@@ -1,3 +1,4 @@
+# Binaries
 *.elf
 *.dol
 *.nacp
@@ -5,10 +6,10 @@
 *.nso
 *.pfs0
 
-build/
-build_gc/
+# Build dirs
 build_wii/
-build_switch/
+build_gamecube/
 
+# IDEs
 .vscode/
 .idea/
