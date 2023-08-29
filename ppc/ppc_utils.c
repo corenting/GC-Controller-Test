@@ -1,9 +1,3 @@
-
-/*
-GC Controller Test
-By corenting
-*/
-
 #include <stdio.h>
 
 #include <gccore.h>

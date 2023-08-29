@@ -1,8 +1,3 @@
-/*
-GC Controller Test
-By corenting
-*/
-
 #include <stdio.h>
 #include "common_utils.h"
 #include "version.h"
@@ -13,11 +8,8 @@ void DrawHeaderText(int activePad) {
 #ifdef __WII__
     printf("Wii version\n\n");
 #endif
-#ifdef __GC__
+#ifdef __GAMECUBE__
     printf("Gamecube version\n\n");
-#endif
-#ifdef __SWITCH__
-    printf("Switch version\n\n");
 #endif
     SetFgColor(1, 2);
     printf("Current controller : %d (press a button on another controller to switch)\n\n\n", activePad + 1);
@@ -26,9 +18,6 @@ void DrawHeaderText(int activePad) {
     SetFgColor(7, 2);
     printf("    A + B : rumble test\n");
 #ifdef __WII__
-    printf("    L + R : return to the loader\n\n");
-#endif
-#ifdef __SWITCH__
     printf("    L + R : return to the loader\n\n");
 #endif
 }
