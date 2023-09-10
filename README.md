@@ -1,5 +1,7 @@
 # GC-Controller-Test
 
+![Build](https://img.shields.io/github/actions/workflow/status/corenting/GC-Controller-Test/ci.yml?branch=master) ![License](https://img.shields.io/github/license/corenting/GC-Controller-Test)
+
 A simple homebrew to test your Gamecube controllers.
 
 Works on both Wii and Gamecube.
