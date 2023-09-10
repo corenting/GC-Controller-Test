@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "master"
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+  clang-format:
+    name: clang-format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: clang-format
+        uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: "14"
+          check-path: "common ppc"
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Build GameCube
+        run: ./build_docker.sh gamecube
+      - name: Build Wii
+        run: ./build_docker.sh wii
+      - name: Upload GameCube artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gc-controller-test-gamecube.dol
+          path: gc-controller-test-gamecube.dol
+      - name: Upload Wii artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gc-controller-test-wii.dol
+          path: gc-controller-test-wii.dol
